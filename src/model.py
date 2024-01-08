@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 from torch.distributions import MultivariateNormal
 from torch.distributions import Categorical
+import torchvision
 
 
 ################################## set device ##################################
@@ -12,13 +13,14 @@ print("=========================================================================
 # set device to cpu or cuda
 device = torch.device('cpu')
 
-if(torch.cuda.is_available()): 
+'''
+if(False and torch.cuda.is_available()): 
     device = torch.device('cuda:0') 
     torch.cuda.empty_cache()
     print("Device set to : " + str(torch.cuda.get_device_name(device)))
 else:
     print("Device set to : cpu")
-    
+'''
 print("============================================================================================")
 
 
@@ -214,7 +216,6 @@ class PPO:
 
         else:
             with torch.no_grad():
-                state = state.copy()
                 state = torch.FloatTensor(state).to(device)
                 action, action_logprob, state_val = self.policy_old.act(state)
             
@@ -289,3 +290,31 @@ class PPO:
     def load(self, checkpoint_path):
         self.policy_old.load_state_dict(torch.load(checkpoint_path, map_location=lambda storage, loc: storage))
         self.policy.load_state_dict(torch.load(checkpoint_path, map_location=lambda storage, loc: storage))
+
+class CNN(nn.Module):
+    def __init__(self):
+        super(CNN, self).__init__()
+        keep_prob = 0.5
+        self.layer1 = torch.nn.Sequential(
+            torchvision.transforms.Resize((32,32),antialias=True),
+            torch.nn.Conv2d(3, 128, kernel_size=3, stride=1, padding=1),
+            torch.nn.ReLU(),
+            torch.nn.MaxPool2d(kernel_size=2, stride=2),
+            torch.nn.Dropout(p=1 - keep_prob),
+            torch.nn.Conv2d(128, 64, kernel_size=3, stride=1, padding=1),
+            torch.nn.ReLU(),
+            torch.nn.MaxPool2d(kernel_size=2, stride=2),
+            torch.nn.Dropout(p=1 - keep_prob),
+            torch.nn.Conv2d(64, 32, kernel_size=3, stride=1, padding=1),
+            torch.nn.ReLU(),
+            torch.nn.MaxPool2d(kernel_size=2, stride=2),
+            torch.nn.Dropout(p=1 - keep_prob),
+            torch.nn.Flatten()
+        )
+
+    # Called with either one element to determine next action, or a batch
+    # during optimization. Returns tensor([[left0exp,right0exp]...]).
+    def forward(self, x):
+        x = x.transpose(1,3)
+        x = self.layer1(x)
+        return x

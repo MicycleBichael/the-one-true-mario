@@ -8,19 +8,18 @@ import numpy as np
 import torch
 import torch.nn as nn
 import os
-
-from torch.distributions import MultivariateNormal
-from torch.distributions import Categorical
-from src.model import RolloutBuffer,PPO,ActorCritic
+from src.model import PPO,CNN
 
 device = torch.device('cpu')
 
+'''
 if(torch.cuda.is_available()): 
     device = torch.device('cuda:0') 
     torch.cuda.empty_cache()
     print("Device set to : " + str(torch.cuda.get_device_name(device)))
 else:
     print("Device set to : cpu")
+'''
 
 env_name = "SuperMarioBros-1-1-v3"
 
@@ -56,6 +55,8 @@ lr_actor = 0.0003       # learning rate for actor network
 lr_critic = 0.001       # learning rate for critic network
 
 random_seed = 0         # set random seed if required (0 = no random seed)
+
+convolutional_net = CNN()
 
 #####################################################
 
@@ -204,6 +205,9 @@ i_episode = 0
 while time_step <= max_training_timesteps:
     
     state = env.reset()
+    state = state.copy()
+    state = torch.tensor(state, dtype=torch.float32, device=device).unsqueeze(0)
+    state = convolutional_net(state)
     current_ep_reward = 0
 
     for t in range(1, max_ep_len+1):
@@ -212,6 +216,10 @@ while time_step <= max_training_timesteps:
         action = ppo_agent.select_action(state)
         state, reward, done, _ = env.step(action)
         
+        state = state.copy()
+        state = torch.tensor(state, dtype=torch.float32, device=device).unsqueeze(0)
+        state = convolutional_net(state)
+
         # saving reward and is_terminals
         ppo_agent.buffer.rewards.append(reward)
         ppo_agent.buffer.is_terminals.append(done)
@@ -276,7 +284,6 @@ while time_step <= max_training_timesteps:
 
 log_f.close()
 env.close()
-
 
 
 
