@@ -59,6 +59,7 @@ class ActorCritic(nn.Module):
             self.action_var = torch.full((action_dim,), action_std_init * action_std_init).to(device)
 
         # actor
+        state_dim = 512
         if has_continuous_action_space :
             self.actor = nn.Sequential(
                             nn.Linear(state_dim, 64),
@@ -70,11 +71,10 @@ class ActorCritic(nn.Module):
                         )
         else:
             self.actor = nn.Sequential(
-                            nn.Linear(state_dim, 64),
+                            nn.Linear(state_dim, state_dim),
                             nn.Tanh(),
-                            nn.Linear(64, 64),
-                            nn.Tanh(),
-                            nn.Linear(64, action_dim),
+                            nn.Dropout(p=0.5),
+                            nn.Linear(state_dim, action_dim),
                             nn.Softmax(dim=-1)
                         )
 

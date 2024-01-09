@@ -1,14 +1,14 @@
 import gym_super_mario_bros as gym
 
 import os
-import glob
-import time
 from datetime import datetime
 import numpy as np
 import torch
-import torch.nn as nn
 import os
 from src.model import PPO,CNN
+
+from nes_py.wrappers import JoypadSpace
+from gym_super_mario_bros.actions import SIMPLE_MOVEMENT as MOVEMENT
 
 device = torch.device('cpu')
 
@@ -63,6 +63,7 @@ convolutional_net = CNN()
 print("training environment name : " + env_name)
 
 env = gym.make(env_name)
+env = JoypadSpace(env, MOVEMENT)
 
 # state space dimension
 state_dim = env.observation_space.shape[0]
