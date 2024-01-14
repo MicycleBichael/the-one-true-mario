@@ -88,6 +88,24 @@ class ActorCritic(nn.Module):
                         nn.Linear(64, 1)
                     )
         
+        keep_prob = 0.5
+        self.cnn = torch.nn.Sequential(
+                        torchvision.transforms.Resize((32,32),antialias=True),
+                        torch.nn.Conv2d(3, 128, kernel_size=3, stride=1, padding=1),
+                        torch.nn.ReLU(),
+                        torch.nn.MaxPool2d(kernel_size=2, stride=2),
+                        torch.nn.Dropout(p=1 - keep_prob),
+                        torch.nn.Conv2d(128, 64, kernel_size=3, stride=1, padding=1),
+                        torch.nn.ReLU(),
+                        torch.nn.MaxPool2d(kernel_size=2, stride=2),
+                        torch.nn.Dropout(p=1 - keep_prob),
+                        torch.nn.Conv2d(64, 32, kernel_size=3, stride=1, padding=1),
+                        torch.nn.ReLU(),
+                        torch.nn.MaxPool2d(kernel_size=2, stride=2),
+                        torch.nn.Dropout(p=1 - keep_prob),
+                        torch.nn.Flatten(),
+                    )
+
     def set_action_std(self, new_action_std):
 
         if self.has_continuous_action_space:
@@ -109,6 +127,8 @@ class ActorCritic(nn.Module):
             cov_mat = torch.diag(self.action_var).unsqueeze(dim=0)
             dist = MultivariateNormal(action_mean, cov_mat)
         else:
+            state = state.transpose(1,3)
+            state = self.cnn(state)
             action_probs = self.actor(state)
             dist = Categorical(action_probs)
 
@@ -132,6 +152,8 @@ class ActorCritic(nn.Module):
                 action = action.reshape(-1, self.action_dim)
 
         else:
+            state = state.transpose(1,3)
+            state = self.cnn(state)
             action_probs = self.actor(state)
             dist = Categorical(action_probs)
 
@@ -290,31 +312,3 @@ class PPO:
     def load(self, checkpoint_path):
         self.policy_old.load_state_dict(torch.load(checkpoint_path, map_location=lambda storage, loc: storage))
         self.policy.load_state_dict(torch.load(checkpoint_path, map_location=lambda storage, loc: storage))
-
-class CNN(nn.Module):
-    def __init__(self):
-        super(CNN, self).__init__()
-        keep_prob = 0.5
-        self.layer1 = torch.nn.Sequential(
-            torchvision.transforms.Resize((32,32),antialias=True),
-            torch.nn.Conv2d(3, 128, kernel_size=3, stride=1, padding=1),
-            torch.nn.ReLU(),
-            torch.nn.MaxPool2d(kernel_size=2, stride=2),
-            torch.nn.Dropout(p=1 - keep_prob),
-            torch.nn.Conv2d(128, 64, kernel_size=3, stride=1, padding=1),
-            torch.nn.ReLU(),
-            torch.nn.MaxPool2d(kernel_size=2, stride=2),
-            torch.nn.Dropout(p=1 - keep_prob),
-            torch.nn.Conv2d(64, 32, kernel_size=3, stride=1, padding=1),
-            torch.nn.ReLU(),
-            torch.nn.MaxPool2d(kernel_size=2, stride=2),
-            torch.nn.Dropout(p=1 - keep_prob),
-            torch.nn.Flatten()
-        )
-
-    # Called with either one element to determine next action, or a batch
-    # during optimization. Returns tensor([[left0exp,right0exp]...]).
-    def forward(self, x):
-        x = x.transpose(1,3)
-        x = self.layer1(x)
-        return x

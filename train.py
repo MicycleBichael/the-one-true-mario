@@ -5,7 +5,7 @@ from datetime import datetime
 import numpy as np
 import torch
 import os
-from src.model import PPO,CNN
+from src.model import PPO
 
 from nes_py.wrappers import JoypadSpace
 from gym_super_mario_bros.actions import SIMPLE_MOVEMENT as MOVEMENT
@@ -55,8 +55,6 @@ lr_actor = 0.0003       # learning rate for actor network
 lr_critic = 0.001       # learning rate for critic network
 
 random_seed = 0         # set random seed if required (0 = no random seed)
-
-convolutional_net = CNN()
 
 #####################################################
 
@@ -208,7 +206,6 @@ while time_step <= max_training_timesteps:
     state = env.reset()
     state = state.copy()
     state = torch.tensor(state, dtype=torch.float32, device=device).unsqueeze(0)
-    state = convolutional_net(state)
     current_ep_reward = 0
 
     for t in range(1, max_ep_len+1):
@@ -219,7 +216,6 @@ while time_step <= max_training_timesteps:
         
         state = state.copy()
         state = torch.tensor(state, dtype=torch.float32, device=device).unsqueeze(0)
-        state = convolutional_net(state)
 
         # saving reward and is_terminals
         ppo_agent.buffer.rewards.append(reward)
