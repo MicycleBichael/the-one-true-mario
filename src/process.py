@@ -7,10 +7,12 @@ from src.env import create_train_env
 from src.model import PPO
 import torch.nn.functional as F
 from collections import deque
+import time
 from gym_super_mario_bros.actions import SIMPLE_MOVEMENT, COMPLEX_MOVEMENT, RIGHT_ONLY
 
 
 def eval(opt, global_model, num_states, num_actions):
+    start_time = time.time()
     torch.manual_seed(123)
     if opt.action_type == "right":
         actions = RIGHT_ONLY
@@ -37,14 +39,14 @@ def eval(opt, global_model, num_states, num_actions):
         policy = F.softmax(logits, dim=1)
         action = torch.argmax(policy).item()
         state, reward, done, info = env.step(action)
-
         # Uncomment following lines if you want to save model whenever level is completed
-        # if info["flag_get"]:
-        #     print("Finished")
-        #     torch.save(local_model.state_dict(),
-        #                "{}/ppo_super_mario_bros_{}_{}_{}".format(opt.saved_path, opt.world, opt.stage, curr_step))
+        if info["flag_get"]:
+            print(f"Finished in {time.time()-start_time} seconds")
+            torch.save(local_model.state_dict(),
+                       "{}/ppo_super_mario_bros_{}_{}_{}".format(opt.saved_path, opt.world, opt.stage, curr_step))
+            break
 
-        env.render()
+        # env.render()
         actions.append(action)
         if curr_step > opt.num_global_steps or actions.count(actions[0]) == actions.maxlen:
             done = True
