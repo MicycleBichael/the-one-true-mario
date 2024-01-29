@@ -1,0 +1,59 @@
+// Computational graph for the feedforward sweep
+digraph PPO {
+	graph [label=<<B>PPO</B><br align='left'/>15 tensors total (5.5 MB)<br align='left'/>623368 params total (2.4 MB)<br align='left'/>> labeljust=left labelloc=t ordering=out rankdir=BT]
+	node [ordering=out shape=box]
+	input_1 [label=<<b>input_1</b><br/>8x4x84x84 (882.2 KB)<br/>@input.x> color=black fillcolor="#98FB98" fontcolor=black ordering=out shape=oval style="filled,solid"]
+	input_1 -> conv2d_1_1 [arrowsize=.7 color=black fontcolor=black labelfontsize=8 style=solid]
+	conv2d_1_1 [label=<<b>conv2d_1_1</b><br/>8x32x42x42 (1.7 MB)<br/>params: 32x4x3x3, x32<br/>@conv1> color=black fillcolor="#E6E6E6" fontcolor=black ordering=out shape=box style="filled,solid"]
+	conv2d_1_1 -> relu_1_2 [arrowsize=.7 color=black fontcolor=black labelfontsize=8 style=solid]
+	relu_1_2 [label=<<b>relu_1_2</b><br/>8x32x42x42 (1.7 MB)> color=black fillcolor=white fontcolor=black ordering=out shape=oval style="filled,solid"]
+	relu_1_2 -> conv2d_2_3 [arrowsize=.7 color=black fontcolor=black labelfontsize=8 style=solid]
+	conv2d_2_3 [label=<<b>conv2d_2_3</b><br/>8x32x21x21 (441.2 KB)<br/>params: 32x32x3x3, x32<br/>@conv2> color=black fillcolor="#E6E6E6" fontcolor=black ordering=out shape=box style="filled,solid"]
+	conv2d_2_3 -> relu_2_4 [arrowsize=.7 color=black fontcolor=black labelfontsize=8 style=solid]
+	relu_2_4 [label=<<b>relu_2_4</b><br/>8x32x21x21 (441.2 KB)> color=black fillcolor=white fontcolor=black ordering=out shape=oval style="filled,solid"]
+	relu_2_4 -> conv2d_3_5 [arrowsize=.7 color=black fontcolor=black labelfontsize=8 style=solid]
+	conv2d_3_5 [label=<<b>conv2d_3_5</b><br/>8x32x11x11 (121.2 KB)<br/>params: 32x32x3x3, x32<br/>@conv3> color=black fillcolor="#E6E6E6" fontcolor=black ordering=out shape=box style="filled,solid"]
+	conv2d_3_5 -> relu_3_6 [arrowsize=.7 color=black fontcolor=black labelfontsize=8 style=solid]
+	relu_3_6 [label=<<b>relu_3_6</b><br/>8x32x11x11 (121.2 KB)> color=black fillcolor=white fontcolor=black ordering=out shape=oval style="filled,solid"]
+	relu_3_6 -> conv2d_4_7 [arrowsize=.7 color=black fontcolor=black labelfontsize=8 style=solid]
+	conv2d_4_7 [label=<<b>conv2d_4_7</b><br/>8x32x6x6 (36.2 KB)<br/>params: 32x32x3x3, x32<br/>@conv4> color=black fillcolor="#E6E6E6" fontcolor=black ordering=out shape=box style="filled,solid"]
+	conv2d_4_7 -> relu_4_8 [arrowsize=.7 color=black fontcolor=black labelfontsize=8 style=solid]
+	relu_4_8 [label=<<b>relu_4_8</b><br/>8x32x6x6 (36.2 KB)> color=black fillcolor=white fontcolor=black ordering=out shape=oval style="filled,solid"]
+	relu_4_8 -> view_1_9 [arrowsize=.7 color=black fontcolor=black labelfontsize=8 style=solid]
+	view_1_9 [label=<<b>view_1_9</b><br/>8x1152 (36.1 KB)> color=black fillcolor=white fontcolor=black ordering=out shape=oval style="filled,solid"]
+	view_1_9 -> linear_1_10 [arrowsize=.7 color=black fontcolor=black labelfontsize=8 style=solid]
+	linear_1_10 [label=<<b>linear_1_10</b><br/>8x512 (16.1 KB)<br/>params: 512x1152, x512<br/>@linear> color=black fillcolor="#E6E6E6" fontcolor=black ordering=out shape=box style="filled,solid"]
+	linear_1_10 -> linear_2_11 [arrowsize=.7 color=black fontcolor=black labelfontsize=8 style=solid]
+	linear_1_10 -> linear_3_12 [arrowsize=.7 color=black fontcolor=black labelfontsize=8 style=solid]
+	linear_2_11 [label=<<b>linear_2_11</b><br/>8x7 (352 B)<br/>params: 7x512, x7<br/>@actor_linear> color=black fillcolor="#E6E6E6" fontcolor=black ordering=out shape=box style="filled,solid"]
+	linear_2_11 -> output_1 [arrowsize=.7 color=black fontcolor=black labelfontsize=8 style=solid]
+	linear_3_12 [label=<<b>linear_3_12</b><br/>8x1 (160 B)<br/>params: 1x512, x1<br/>@critic_linear> color=black fillcolor="#E6E6E6" fontcolor=black ordering=out shape=box style="filled,solid"]
+	linear_3_12 -> output_2 [arrowsize=.7 color=black fontcolor=black labelfontsize=8 style=solid]
+	output_1 [label=<<b>output_1</b><br/>8x7 (352 B)<br/>@output.0> color=black fillcolor="#ff9999" fontcolor=black ordering=out shape=oval style="filled,solid"]
+	output_2 [label=<<b>output_2</b><br/>8x1 (160 B)<br/>@output.1> color=black fillcolor="#ff9999" fontcolor=black ordering=out shape=oval style="filled,solid"]
+	{
+		rank=sink
+		output_2
+	}
+	subgraph cluster_conv1 {
+		fillcolor=white label=<<B>@conv1</B><br align='left'/>(Conv2d)<br align='left'/>> labelloc=b penwidth=5.0 style="filled,dashed"
+	}
+	subgraph cluster_conv2 {
+		fillcolor=white label=<<B>@conv2</B><br align='left'/>(Conv2d)<br align='left'/>> labelloc=b penwidth=5.0 style="filled,dashed"
+	}
+	subgraph cluster_conv3 {
+		fillcolor=white label=<<B>@conv3</B><br align='left'/>(Conv2d)<br align='left'/>> labelloc=b penwidth=5.0 style="filled,dashed"
+	}
+	subgraph cluster_conv4 {
+		fillcolor=white label=<<B>@conv4</B><br align='left'/>(Conv2d)<br align='left'/>> labelloc=b penwidth=5.0 style="filled,dashed"
+	}
+	subgraph cluster_linear {
+		fillcolor=white label=<<B>@linear</B><br align='left'/>(Linear)<br align='left'/>> labelloc=b penwidth=5.0 style="filled,dashed"
+	}
+	subgraph cluster_actor_linear {
+		fillcolor=white label=<<B>@actor_linear</B><br align='left'/>(Linear)<br align='left'/>> labelloc=b penwidth=5.0 style="filled,dashed"
+	}
+	subgraph cluster_critic_linear {
+		fillcolor=white label=<<B>@critic_linear</B><br align='left'/>(Linear)<br align='left'/>> labelloc=b penwidth=5.0 style="filled,dashed"
+	}
+}

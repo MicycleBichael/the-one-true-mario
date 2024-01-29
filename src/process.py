@@ -12,7 +12,6 @@ from gym_super_mario_bros.actions import SIMPLE_MOVEMENT, COMPLEX_MOVEMENT, RIGH
 
 
 def eval(opt, global_model, num_states, num_actions):
-    start_time = time.time()
     torch.manual_seed(123)
     if opt.action_type == "right":
         actions = RIGHT_ONLY
@@ -31,6 +30,7 @@ def eval(opt, global_model, num_states, num_actions):
     done = True
     curr_step = 0
     actions = deque(maxlen=opt.max_actions)
+    lastScore = 0
     while True:
         curr_step += 1
         if done:
@@ -39,9 +39,12 @@ def eval(opt, global_model, num_states, num_actions):
         policy = F.softmax(logits, dim=1)
         action = torch.argmax(policy).item()
         state, reward, done, info = env.step(action)
+        if info["score"] > lastScore:
+            lastScore = info["score"]
+            reward += 50
         # Uncomment following lines if you want to save model whenever level is completed
         if info["flag_get"]:
-            print(f"Finished in {time.time()-start_time} seconds")
+            print(f"Finished")
             torch.save(local_model.state_dict(),
                        "{}/ppo_super_mario_bros_{}_{}_{}".format(opt.saved_path, opt.world, opt.stage, curr_step))
             break

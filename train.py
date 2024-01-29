@@ -15,7 +15,9 @@ from torch.distributions import Categorical
 import torch.nn.functional as F
 import numpy as np
 import shutil
-
+import time
+from statistics import mean
+from torchview import draw_graph
 
 def get_args():
     parser = argparse.ArgumentParser(
@@ -42,6 +44,7 @@ def get_args():
 
 
 def train(opt):
+    begin_time = time.time()
     if torch.cuda.is_available():
         torch.cuda.manual_seed(123)
     else:
@@ -63,6 +66,8 @@ def train(opt):
     [agent_conn.send(("reset", None)) for agent_conn in envs.agent_conns]
     curr_states = [agent_conn.recv() for agent_conn in envs.agent_conns]
     curr_states = torch.from_numpy(np.concatenate(curr_states, 0))
+    model_graph = draw_graph(model,input_size=(curr_states.shape),expand_nested=True)
+    model_graph.visual_graph
     if torch.cuda.is_available():
         curr_states = curr_states.cuda()
     curr_episode = 0
@@ -78,6 +83,7 @@ def train(opt):
         values = []
         states = []
         rewards = []
+        reikaRewSum = 0
         dones = []
         for _ in range(opt.num_local_steps):
             states.append(curr_states)
@@ -96,6 +102,10 @@ def train(opt):
 
             state, reward, done, info = zip(*[agent_conn.recv() for agent_conn in envs.agent_conns])
             state = torch.from_numpy(np.concatenate(state, 0))
+            reikaRewSum += mean(reward)
+            if reikaRewSum > 200:
+                 print(f"FINISHED! w/ time {time.time() - begin_time} seconds")
+                 return
             if torch.cuda.is_available():
                 state = state.cuda()
                 reward = torch.cuda.FloatTensor(reward)
@@ -108,6 +118,7 @@ def train(opt):
             curr_states = state
 
         _, next_value, = model(curr_states)
+        # model_history = tl.log_forward_pass(model,curr_states,layers_to_save='all',vis_opt='rolled')
         next_value = next_value.squeeze()
         old_log_policies = torch.cat(old_log_policies).detach()
         actions = torch.cat(actions)
@@ -146,7 +157,7 @@ def train(opt):
                 total_loss.backward()
                 torch.nn.utils.clip_grad_norm_(model.parameters(), 0.5)
                 optimizer.step()
-        print("Episode: {}. Total loss: {}".format(curr_episode, total_loss))
+        print("Episode: {}. Total loss: {} | Reward: {}".format(curr_episode, total_loss,reikaRewSum))
 
 
 if __name__ == "__main__":
