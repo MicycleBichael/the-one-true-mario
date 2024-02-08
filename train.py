@@ -155,9 +155,10 @@ def train(opt):
                 torch.nn.utils.clip_grad_norm_(model.parameters(), 0.5)
                 optimizer.step()
         print("Episode: {}. Total loss: {} | Reward: {}".format(curr_episode, total_loss,reikaRewSum))
+        return begin_time
 
 
 if __name__ == "__main__":
     opt = get_args()
-    train(opt)
+    begin_time = train(opt)
     print(f"FINISHED! w/ time {time.time() - begin_time} seconds")
