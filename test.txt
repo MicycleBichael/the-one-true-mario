@@ -1,0 +1,1 @@
+<built-in method now of type object at 0x9266c0> | 0.002765178680419922
