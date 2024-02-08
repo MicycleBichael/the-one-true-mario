@@ -16,8 +16,11 @@ import torch.nn.functional as F
 import numpy as np
 import shutil
 import time
+import datetime
 from statistics import mean
 from torchview import draw_graph
+
+begin_time = time.time()
 
 def get_args():
     parser = argparse.ArgumentParser(
@@ -39,6 +42,7 @@ def get_args():
     parser.add_argument("--max_actions", type=int, default=200, help="Maximum repetition steps in test phase")
     parser.add_argument("--log_path", type=str, default="tensorboard/ppo_super_mario_bros")
     parser.add_argument("--saved_path", type=str, default="trained_models")
+    parser.add_argument("--test_type", type=str, default="control")
     args = parser.parse_args()
     return args
 
@@ -159,5 +163,8 @@ def train(opt):
 
 if __name__ == "__main__":
     opt = get_args()
-    train(opt)
-    print(f"FINISHED! w/ time {time.time() - begin_time} seconds")
+    final_time = time.time() - begin_time
+    print(f"FINISHED! w/ time {final_time} seconds")
+    file = open("test.txt","a")
+    file.write(f"{datetime.datetime.now} | {final_time}")
+    file.close()

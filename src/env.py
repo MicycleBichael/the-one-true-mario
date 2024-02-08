@@ -36,6 +36,8 @@ def process_frame(frame):
         return np.zeros((1, 84, 84))
 
 
+
+
 class CustomReward(Wrapper):
     def __init__(self, env=None, world=None, stage=None, monitor=None):
         super(CustomReward, self).__init__(env)

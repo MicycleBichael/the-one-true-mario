@@ -30,7 +30,6 @@ def eval(opt, global_model, num_states, num_actions):
     done = True
     curr_step = 0
     actions = deque(maxlen=opt.max_actions)
-    lastScore = 0
     while True:
         curr_step += 1
         if done:
