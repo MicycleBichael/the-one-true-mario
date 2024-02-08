@@ -39,9 +39,6 @@ def eval(opt, global_model, num_states, num_actions):
         policy = F.softmax(logits, dim=1)
         action = torch.argmax(policy).item()
         state, reward, done, info = env.step(action)
-        if info["score"] > lastScore:
-            lastScore = info["score"]
-            reward += 50
         # Uncomment following lines if you want to save model whenever level is completed
         if info["flag_get"]:
             print(f"Finished")

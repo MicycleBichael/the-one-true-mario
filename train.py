@@ -103,9 +103,6 @@ def train(opt):
             state, reward, done, info = zip(*[agent_conn.recv() for agent_conn in envs.agent_conns])
             state = torch.from_numpy(np.concatenate(state, 0))
             reikaRewSum += mean(reward)
-            if reikaRewSum > 200:
-                 print(f"FINISHED! w/ time {time.time() - begin_time} seconds")
-                 return
             if torch.cuda.is_available():
                 state = state.cuda()
                 reward = torch.cuda.FloatTensor(reward)
@@ -163,3 +160,4 @@ def train(opt):
 if __name__ == "__main__":
     opt = get_args()
     train(opt)
+    print(f"FINISHED! w/ time {time.time() - begin_time} seconds")
