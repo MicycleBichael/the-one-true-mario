@@ -164,8 +164,9 @@ def train(opt):
 
 if __name__ == "__main__":
     opt = get_args()
+    train(opt)
     final_time = time.time() - begin_time
     print(f"FINISHED! w/ time {final_time} seconds")
     file = open("test.txt","a")
-    file.write(f"{datetime.datetime.now} | {final_time}")
+    file.write(f"{datetime.datetime.now()} | {final_time}\n")
     file.close()
