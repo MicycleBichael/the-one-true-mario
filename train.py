@@ -48,6 +48,7 @@ def get_args():
 
 
 def train(opt):
+    print(f"{opt.world}-{opt.stage} | {opt.lr}")
     begin_time = time.time()
     file = open("time.txt","r")
     file_time = float(file.readline())
