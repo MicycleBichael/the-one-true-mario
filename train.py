@@ -38,10 +38,10 @@ def get_args():
     parser.add_argument("--num_local_steps", type=int, default=512)
     parser.add_argument("--num_global_steps", type=int, default=5e6)
     parser.add_argument("--num_processes", type=int, default=8)
-    parser.add_argument("--save_interval", type=int, default=50, help="Number of steps between savings")
+    parser.add_argument("--save_interval", type=int, default=100, help="Number of steps between savings")
     parser.add_argument("--max_actions", type=int, default=200, help="Maximum repetition steps in test phase")
     parser.add_argument("--log_path", type=str, default="tensorboard/ppo_super_mario_bros")
-    parser.add_argument("--saved_path", type=str, default="trained_models")
+    parser.add_argument("--saved_path", type=str, default="trained_models_reika")
     parser.add_argument("--test_type", type=str, default="control")
     args = parser.parse_args()
     return args
@@ -49,6 +49,12 @@ def get_args():
 
 def train(opt):
     begin_time = time.time()
+    file = open("time.txt","r")
+    file_time = float(file.readline())
+    if file_time > -1:
+        begin_time = begin_time-file_time
+    file.close()
+    print(f"Starting time count at {round(time.time()-begin_time,2)} seconds...")
     if torch.cuda.is_available():
         torch.cuda.manual_seed(123)
     else:
@@ -76,11 +82,13 @@ def train(opt):
         curr_states = curr_states.cuda()
     curr_episode = 0
     while True:
-        # if curr_episode % opt.save_interval == 0 and curr_episode > 0:
-        #     torch.save(model.state_dict(),
-        #                "{}/ppo_super_mario_bros_{}_{}".format(opt.saved_path, opt.world, opt.stage))
-        #     torch.save(model.state_dict(),
-        #                "{}/ppo_super_mario_bros_{}_{}_{}".format(opt.saved_path, opt.world, opt.stage, curr_episode))
+        if curr_episode % opt.save_interval == 0 and curr_episode > 0:
+            torch.save(model.state_dict(),
+                       "{}/ppo_super_mario_bros_{}_{}".format(opt.saved_path, opt.world, opt.stage))
+            torch.save(model.state_dict(),
+                       "{}/ppo_super_mario_bros_{}_{}_{}".format(opt.saved_path, opt.world, opt.stage, curr_episode))
+            with open('time.txt','w') as f:
+                f.write(time.time()-begin_time)
         curr_episode += 1
         old_log_policies = []
         actions = []
@@ -168,5 +176,5 @@ if __name__ == "__main__":
     final_time = time.time() - begin_time
     print(f"FINISHED! w/ time {final_time} seconds")
     file = open("test.txt","a")
-    file.write(f"{datetime.datetime.now()} | {final_time}\n")
+    file.write(f"{opt.test_type} |{datetime.datetime.now()} | {final_time}\n")
     file.close()

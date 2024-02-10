@@ -58,6 +58,7 @@ class CustomReward(Wrapper):
         reward += (info["score"] - self.curr_score) / 40.
         self.curr_score = info["score"]
         stochastic_modifier = 0
+        print(f"Test type \"{self.test_type}\" selected")
         if self.test_type != "control" and np.random.random() > 0.7:
             if self.test_type == "positive":
                 stochastic_modifier = 1
