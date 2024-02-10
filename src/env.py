@@ -37,13 +37,14 @@ def process_frame(frame):
 
 
 class CustomReward(Wrapper):
-    def __init__(self, env=None, world=None, stage=None, monitor=None):
+    def __init__(self, env=None, world=None, stage=None, monitor=None, test_type = "control"):
         super(CustomReward, self).__init__(env)
         self.observation_space = Box(low=0, high=255, shape=(1, 84, 84))
         self.curr_score = 0
         self.current_x = 40
         self.world = world
         self.stage = stage
+        self.test_type = test_type
         if monitor:
             self.monitor = monitor
         else:
@@ -56,6 +57,17 @@ class CustomReward(Wrapper):
         state = process_frame(state)
         reward += (info["score"] - self.curr_score) / 40.
         self.curr_score = info["score"]
+        stochastic_modifier = 0
+        if self.test_type != "control" and np.random.random() > 0.7:
+            if self.test_type == "positive":
+                stochastic_modifier = 1
+            elif self.test_type == "negative":
+                stochastic_modifier = -1
+            else:
+                stochastic_modifier = "bob"
+                print("THAT'S NOT A VALID TEST TYPE DONKUS")
+        reward += stochastic_modifier*10
+        
         if done:
             if info["flag_get"]:
                 reward += 50
@@ -115,7 +127,7 @@ class CustomSkipFrame(Wrapper):
         return self.states[None, :, :, :].astype(np.float32)
 
 
-def create_train_env(world, stage, actions, output_path=None):
+def create_train_env(world, stage, actions, output_path=None, test_type = "control"):
     env = gym_super_mario_bros.make("SuperMarioBros-{}-{}-v0".format(world, stage))
     if output_path:
         monitor = Monitor(256, 240, output_path)
@@ -123,7 +135,7 @@ def create_train_env(world, stage, actions, output_path=None):
         monitor = None
 
     env = JoypadSpace(env, actions)
-    env = CustomReward(env, world, stage, monitor)
+    env = CustomReward(env, world, stage, monitor, test_type)
     env = CustomSkipFrame(env)
     return env
 
