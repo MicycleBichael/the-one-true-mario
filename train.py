@@ -67,6 +67,10 @@ def train(opt):
     mp = _mp.get_context("spawn")
     envs = MultipleEnvironments(opt.world, opt.stage, opt.action_type, opt.num_processes)
     model = PPO(envs.num_states, envs.num_actions)
+    if len(os.listdir(opt.saved_path)) > 0:
+        print("Loading save")
+        model.load_state_dict(torch.load("{}/ppo_super_mario_bros_{}_{}".format(opt.saved_path, opt.world, opt.stage)))
+        model.cuda()
     if torch.cuda.is_available():
         model.cuda()
     model.share_memory()
