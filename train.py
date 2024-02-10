@@ -19,6 +19,9 @@ import time
 import datetime
 from statistics import mean
 from torchview import draw_graph
+import warnings
+
+warnings.filterwarnings("ignore")
 
 begin_time = time.time()
 
@@ -48,7 +51,7 @@ def get_args():
 
 
 def train(opt):
-    print(f"{opt.world}-{opt.stage} | {opt.lr}")
+    print(f"{opt.world}-{opt.stage} | {opt.lr} | {opt.test_type}")
     begin_time = time.time()
     file = open("time.txt","r")
     file_time = float(file.readline())
@@ -172,7 +175,6 @@ def train(opt):
                 torch.nn.utils.clip_grad_norm_(model.parameters(), 0.5)
                 optimizer.step()
         print("Episode: {}. Total loss: {} | Reward: {}".format(curr_episode, total_loss,reikaRewSum))
-        return begin_time
 
 
 if __name__ == "__main__":
@@ -181,5 +183,5 @@ if __name__ == "__main__":
     final_time = time.time() - begin_time
     print(f"FINISHED! w/ time {final_time} seconds")
     file = open("test.txt","a")
-    file.write(f"{opt.test_type} |{datetime.datetime.now()} | {final_time}\n")
+    file.write(f"{opt.test_type} | {datetime.datetime.now()} | {final_time}\n")
     file.close()
