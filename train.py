@@ -96,7 +96,7 @@ def train(opt):
             torch.save(model.state_dict(),
                        "{}/ppo_super_mario_bros_{}_{}_{}".format(opt.saved_path, opt.world, opt.stage, curr_episode))
             with open('time.txt','w') as f:
-                f.write(time.time()-begin_time)
+                f.write(str(time.time()-begin_time))
         curr_episode += 1
         old_log_policies = []
         actions = []

@@ -18,7 +18,7 @@ def get_args():
     parser.add_argument("--world", type=int, default=1)
     parser.add_argument("--stage", type=int, default=1)
     parser.add_argument("--action_type", type=str, default="simple")
-    parser.add_argument("--saved_path", type=str, default="trained_models")
+    parser.add_argument("--saved_path", type=str, default="trained_models_reika")
     parser.add_argument("--output_path", type=str, default="output")
     args = parser.parse_args()
     return args
