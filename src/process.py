@@ -44,8 +44,7 @@ def eval(opt, global_model, num_states, num_actions):
             print(f"Finished")
             torch.save(local_model.state_dict(),
                        "{}/ppo_super_mario_bros_{}_{}_{}".format(opt.saved_path, opt.world, opt.stage, curr_step))
-            opt.complete = True
-            break
+            raise Exception("it's done!")
 
         # env.render()
         actions.append(action)

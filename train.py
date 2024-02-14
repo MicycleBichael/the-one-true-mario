@@ -51,7 +51,6 @@ def get_args():
 
 
 def train(opt):
-    opt.complete = False
     print(f"{opt.world}-{opt.stage} | {opt.lr} | {opt.test_type}")
     begin_time = time.time()
     file = open("time.txt","r")
@@ -176,15 +175,15 @@ def train(opt):
                 torch.nn.utils.clip_grad_norm_(model.parameters(), 0.5)
                 optimizer.step()
         print("Episode: {}. Total loss: {} | Reward: {}".format(curr_episode, total_loss,reikaRewSum))
-        if opt.complete:
-            return
 
 
 if __name__ == "__main__":
     opt = get_args()
-    train(opt)
-    final_time = time.time() - begin_time
-    print(f"FINISHED! w/ time {final_time} seconds")
-    file = open("test.txt","a")
-    file.write(f"{opt.test_type} | {datetime.datetime.now()} | {final_time}\n")
-    file.close()
+    try:
+        train(opt)
+    except:
+        final_time = time.time() - begin_time
+        print(f"FINISHED! w/ time {final_time} seconds")
+        file = open("test.txt","a")
+        file.write(f"{opt.test_type} | {datetime.datetime.now()} | {final_time}\n")
+        file.close()
