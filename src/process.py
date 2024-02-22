@@ -9,6 +9,7 @@ import torch.nn.functional as F
 from collections import deque
 import time
 from gym_super_mario_bros.actions import SIMPLE_MOVEMENT, COMPLEX_MOVEMENT, RIGHT_ONLY
+import sys
 
 
 def eval(opt, global_model, num_states, num_actions):
@@ -42,9 +43,11 @@ def eval(opt, global_model, num_states, num_actions):
         # Uncomment following lines if you want to save model whenever level is completed
         if info["flag_get"]:
             print(f"Finished")
-            torch.save(local_model.state_dict(),
-                       "{}/ppo_super_mario_bros_{}_{}_{}".format(opt.saved_path, opt.world, opt.stage, curr_step))
-            raise Exception("it's done!")
+            #torch.save(local_model.state_dict(),
+            #           "{}/ppo_super_mario_bros_{}_{}_{}".format(opt.saved_path, opt.world, opt.stage, curr_step))
+            with open('jank.txt','w') as f:
+                f.write("TRUE")
+            break
 
         # env.render()
         actions.append(action)

@@ -20,6 +20,8 @@ import datetime
 from statistics import mean
 from torchview import draw_graph
 import warnings
+import sys
+import os
 
 warnings.filterwarnings("ignore")
 
@@ -90,13 +92,13 @@ def train(opt):
         curr_states = curr_states.cuda()
     curr_episode = 0
     while True:
-        if curr_episode % opt.save_interval == 0 and curr_episode > 0:
+        '''if curr_episode % opt.save_interval == 0 and curr_episode > 0:
             torch.save(model.state_dict(),
                        "{}/ppo_super_mario_bros_{}_{}".format(opt.saved_path, opt.world, opt.stage))
             torch.save(model.state_dict(),
                        "{}/ppo_super_mario_bros_{}_{}_{}".format(opt.saved_path, opt.world, opt.stage, curr_episode))
             with open('time.txt','w') as f:
-                f.write(str(time.time()-begin_time))
+                f.write(str(time.time()-begin_time))'''
         curr_episode += 1
         old_log_policies = []
         actions = []
@@ -175,15 +177,21 @@ def train(opt):
                 torch.nn.utils.clip_grad_norm_(model.parameters(), 0.5)
                 optimizer.step()
         print("Episode: {}. Total loss: {} | Reward: {}".format(curr_episode, total_loss,reikaRewSum))
+        with open('jank.txt','r') as f:
+            val = f.readline()
+            if len(val) > 3:
+                print("It's DANG DONE")
+                return
 
 
 if __name__ == "__main__":
     opt = get_args()
-    try:
-        train(opt)
-    except:
-        final_time = time.time() - begin_time
-        print(f"FINISHED! w/ time {final_time} seconds")
-        file = open("test.txt","a")
-        file.write(f"{opt.test_type} | {datetime.datetime.now()} | {final_time}\n")
-        file.close()
+    train(opt)
+    with open('jank.txt','w') as f:
+        f.write("")
+    final_time = time.time() - begin_time
+    print(f"FINISHED! w/ time {final_time} seconds")
+    file = open("test.txt","a")
+    file.write(f"{opt.test_type} | {datetime.datetime.now()} | {final_time}\n")
+    file.close()
+    os._exit(0)
